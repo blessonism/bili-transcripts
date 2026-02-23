@@ -107,11 +107,16 @@ def find_available_key(st, start_idx, dur):
 
 def download_audio(bvid, out):
     out.unlink(missing_ok=True)
+    # Use ba/worst with -x to handle videos without separate audio streams
+    # ba = best audio only; worst = lowest quality video as fallback
+    # -x extracts audio; --audio-format m4a converts to m4a
+    out_template = str(out).rsplit(".", 1)[0] + ".%(ext)s"
     try:
         r = subprocess.run([
-            "yt-dlp", "-f", "ba[ext=m4a]/ba", "--no-video", "--no-playlist",
+            "yt-dlp", "-f", "ba/worst", "-x", "--audio-format", "m4a",
+            "--no-playlist",
             "--cookies", str(COOKIES_PATH), "--socket-timeout", "30",
-            "--retries", "2", "--limit-rate", "2M", "-o", str(out), "-q",
+            "--retries", "2", "--limit-rate", "2M", "-o", out_template, "-q",
             f"https://www.bilibili.com/video/{bvid}"
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
            timeout=DOWNLOAD_TIMEOUT)
