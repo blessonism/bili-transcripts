@@ -22,16 +22,6 @@ TRANSCRIPTS_DIR = f"{BASE_DIR}/data/transcripts"
 TRANSCRIPTS_ASR_DIR = f"{BASE_DIR}/data/transcripts_asr"
 DOCS_DIR = f"{BASE_DIR}/docs"
 
-CATEGORY_EMOJI = {
-    "人情世故": "🎭",
-    "职业发展": "💼",
-    "认知成长": "🧠",
-    "技术工具": "💻",
-    "学业考试": "📚",
-    "影视娱乐": "🎬",
-    "生活方式": "🍳",
-    "深度内容": "🌍",
-}
 
 
 def sanitize_filename(name, max_len=60):
@@ -70,7 +60,6 @@ def format_duration(seconds):
 
 def generate_video_md(video, transcript, source):
     c = video["classification"]
-    emoji = CATEGORY_EMOJI.get(c["primary_category"], "📄")
     dur = format_duration(video["duration"])
     pubdate = video.get("pubdate", "")
     if isinstance(pubdate, (int, float)) and pubdate > 0:
@@ -90,7 +79,7 @@ def generate_video_md(video, transcript, source):
 | UP主 | {video["upper"]} |
 | 时长 | {dur} |
 | 发布日期 | {pubdate} |
-| 分类 | {emoji} {c["primary_category"]} / {c["sub_category"]} |
+| 分类 | {c["primary_category"]} / {c["sub_category"]} |
 | 置信度 | {c["confidence"]} |
 | 标签 | {", ".join(c.get("tags", []))} |
 | 文稿来源 | {source_label} |
@@ -142,8 +131,7 @@ def main():
     file_count = 0
     polished_count = 0
     for primary, subs in sorted(by_category.items()):
-        emoji = CATEGORY_EMOJI.get(primary, "📄")
-        primary_dir = sanitize_dirname(f"{emoji} {primary}")
+        primary_dir = sanitize_dirname(primary)
         for sub, vids in sorted(subs.items()):
             sub_dir = sanitize_dirname(sub)
             dir_path = os.path.join(DOCS_DIR, primary_dir, sub_dir)
@@ -181,10 +169,9 @@ def generate_index(videos, by_category):
     lines.append("## 分类总览\n")
 
     for primary, subs in sorted(by_category.items()):
-        emoji = CATEGORY_EMOJI.get(primary, "📄")
         total = sum(len(v) for v in subs.values())
-        primary_dir = sanitize_dirname(f"{emoji} {primary}")
-        lines.append(f"### {emoji} {primary}（{total}）\n")
+        primary_dir = sanitize_dirname(primary)
+        lines.append(f"### {primary}（{total}）\n")
         for sub, vids in sorted(subs.items()):
             sub_dir = sanitize_dirname(sub)
             lines.append(f"- [{sub}]({primary_dir}/{sub_dir}/)（{len(vids)}）")
@@ -203,12 +190,11 @@ def generate_index(videos, by_category):
 
 
 def generate_category_index(primary, subs):
-    emoji = CATEGORY_EMOJI.get(primary, "📄")
-    primary_dir = sanitize_dirname(f"{emoji} {primary}")
+    primary_dir = sanitize_dirname(primary)
     dir_path = os.path.join(DOCS_DIR, primary_dir)
     os.makedirs(dir_path, exist_ok=True)
 
-    lines = [f"# {emoji} {primary}\n"]
+    lines = [f"# {primary}\n"]
     total = sum(len(v) for v in subs.values())
     lines.append(f"> 共 {total} 个视频\n")
 
