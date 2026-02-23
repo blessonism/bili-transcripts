@@ -121,6 +121,24 @@ nohup bash scripts/asr_runner.sh &
 
 > 存量清完后不需要再跑这个脚本，日常增量由 `pipeline.py` 的 cron 任务处理。
 
+### 6. 快速导入单个视频
+
+看到一个好视频，想立刻导出文案到文稿库：
+
+```bash
+# 直接传 BV 号或完整 URL
+.venv/bin/python3 scripts/quick_import.py BV1xxxxxx
+.venv/bin/python3 scripts/quick_import.py https://www.bilibili.com/video/BV1xxxxxx
+
+# 仅提取+分类，不触发部署
+.venv/bin/python3 scripts/quick_import.py BV1xxxxxx --no-deploy
+
+# 强制走 ASR（即使有字幕）
+.venv/bin/python3 scripts/quick_import.py BV1xxxxxx --force-asr
+```
+
+流程：获取元数据 → 提取字幕/ASR → AI 分类 → 追加到 classification.json → 重建 MDX → Git Push → Build & Deploy。全程约 3-5 分钟。
+
 ## 目录结构
 
 ```
@@ -134,7 +152,8 @@ bili-transcripts/
 │   ├── step4_classify_asr.py   # LLM 分类（ASR 文稿）
 │   ├── step5_generate_docs.py  # Markdown 文档库生成
 │   ├── wbi.py                  # B 站 WBI 签名工具
-│   └── asr_runner.sh           # 存量 ASR 清理循环脚本（一次性使用）
+│   ├── asr_runner.sh           # 存量 ASR 清理循环脚本（一次性使用）
+│   └── quick_import.py         # 单视频快速导入（手动触发）
 ├── config/
 │   ├── credentials.json         # 凭据（gitignore）
 │   └── credentials.example.json # 凭据模板
