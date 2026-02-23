@@ -9,10 +9,12 @@ import json, os, time, subprocess
 from datetime import datetime
 from pathlib import Path
 from groq import Groq
+import httpx
 
 # ── Config ──
 PROJECT = Path("/root/projects/bili-transcripts")
 CREDS_PATH = PROJECT / "config/credentials.json"
+PROXY_URL = "http://127.0.0.1:7890"
 
 with open(CREDS_PATH) as f:
     creds = json.load(f)
@@ -153,7 +155,7 @@ def main():
         save_status(st)
         return
 
-    client = Groq(api_key=API_KEYS[current_key_idx])
+    client = Groq(api_key=API_KEYS[current_key_idx], http_client=httpx.Client(proxy=PROXY_URL))
     kh = key_hash(API_KEYS[current_key_idx])
     ku = get_key_usage(st, kh)
     log(f"Starting with key ..{kh} (hourly={ku['hourly_audio']/3600:.2f}h daily={ku['daily_audio']/3600:.2f}h)")
@@ -176,7 +178,7 @@ def main():
             if new_idx is not None:
                 current_key_idx = new_idx
                 kh = new_kh
-                client = Groq(api_key=API_KEYS[current_key_idx])
+                client = Groq(api_key=API_KEYS[current_key_idx], http_client=httpx.Client(proxy=PROXY_URL))
                 ku = get_key_usage(st, kh)
                 log(f"Rotated to key ..{kh} (hourly={ku['hourly_audio']/3600:.2f}h daily={ku['daily_audio']/3600:.2f}h)")
             else:
@@ -221,7 +223,7 @@ def main():
                 if new_idx is not None:
                     current_key_idx = new_idx
                     kh = new_kh
-                    client = Groq(api_key=API_KEYS[new_idx])
+                    client = Groq(api_key=API_KEYS[new_idx], http_client=httpx.Client(proxy=PROXY_URL))
                     log(f"Rotated to key ..{kh}")
                     continue
                 else:
