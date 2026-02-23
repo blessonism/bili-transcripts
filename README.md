@@ -102,6 +102,25 @@ cp config/credentials.example.json config/credentials.json
 0 20 */2 * * cd /path/to/bili-transcripts && .venv/bin/python3 scripts/pipeline.py >> /tmp/bili-pipeline.log 2>&1
 ```
 
+### 5. 存量 ASR 清理（可选）
+
+首次部署时，如果有大量无字幕视频需要 ASR 转写，`pipeline.py` 单次运行可能因 Groq 额度限制无法处理完。
+`asr_runner.sh` 是一个一次性循环脚本，专门用于清理存量：
+
+```bash
+# 后台启动，自动循环直到当天额度用完
+nohup bash scripts/asr_runner.sh &
+```
+
+工作方式：
+- 循环调用 `step3_asr_groq.py`，每轮之间等待 61 分钟（Groq 小时级额度重置）
+- 检测到当天所有 key 的 daily limit 用完后自动退出
+- 所有视频处理完毕也会自动退出
+- 最多跑 24 轮（安全上限，约 24 小时）
+- 日志输出到 `/tmp/asr-runner.log`
+
+> 存量清完后不需要再跑这个脚本，日常增量由 `pipeline.py` 的 cron 任务处理。
+
 ## 目录结构
 
 ```
@@ -114,7 +133,8 @@ bili-transcripts/
 │   ├── step4_classify.py       # LLM 分类（字幕文稿）
 │   ├── step4_classify_asr.py   # LLM 分类（ASR 文稿）
 │   ├── step5_generate_docs.py  # Markdown 文档库生成
-│   └── wbi.py                  # B 站 WBI 签名工具
+│   ├── wbi.py                  # B 站 WBI 签名工具
+│   └── asr_runner.sh           # 存量 ASR 清理循环脚本（一次性使用）
 ├── config/
 │   ├── credentials.json         # 凭据（gitignore）
 │   └── credentials.example.json # 凭据模板
