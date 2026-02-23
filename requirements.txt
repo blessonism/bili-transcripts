@@ -1,0 +1,14 @@
+# B站 API
+bilibili-api-python>=17.0.0
+httpx>=0.27.0
+
+# 音频下载
+yt-dlp>=2024.12.0
+
+# ASR (按需启用)
+# alibabacloud-nls20190201  # 阿里云语音识别
+# openai                     # Whisper API
+
+# 通用
+tqdm>=4.66.0
+rich>=13.0.0

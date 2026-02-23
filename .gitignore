@@ -1,0 +1,19 @@
+# Data (large, generated)
+data/
+logs/
+
+# Credentials (sensitive)
+config/credentials.json
+config/cookies.txt
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Temp
+*.tmp
+*.bak
+/tmp/
+docs/
+run_asr.sh
