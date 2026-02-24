@@ -207,6 +207,7 @@ def write_output(all_videos, progress):
             "link": f"https://www.bilibili.com/video/{bvid}",
             "cover": v.get("cover", ""),
             "pubdate": v.get("pubdate", ""),
+            "fav_time": v.get("fav_time", 0),
             "classification": cls,
         })
     results.sort(key=lambda x: (x["classification"]["primary_category"], x["classification"]["sub_category"]))

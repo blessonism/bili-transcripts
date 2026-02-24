@@ -217,6 +217,7 @@ def merge_output(all_videos, existing_classified, new_progress):
             "link": f"https://www.bilibili.com/video/{bvid}",
             "cover": v.get("cover", ""),
             "pubdate": v.get("pubdate", ""),
+            "fav_time": v.get("fav_time", 0),
             "classification": cls,
             "source": "asr",
         })
